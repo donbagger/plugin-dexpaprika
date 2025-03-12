@@ -1,0 +1,48 @@
+{
+  "name": "@elizaos/plugin-dexpaprika",
+  "version": "0.1.0",
+  "description": "DeFi analytics plugin using DexPaprika API for ElizaOS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "elizaos-plugin",
+    "defi",
+    "crypto",
+    "blockchain",
+    "dexpaprika"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {
+      "DEXPAPRIKA_API_KEY": {
+        "type": "string",
+        "description": "API key for DexPaprika service (if needed)",
+        "required": false
+      },
+      "DEXPAPRIKA_API_URL": {
+        "type": "string",
+        "description": "Base URL for DexPaprika API",
+        "default": "https://api.dexpaprika.com"
+      }
+    }
+  }
+}
