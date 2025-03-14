@@ -1,224 +1,90 @@
-# ElizaOS DexPaprika Plugin
+# DexPaprika Plugin for ElizaOS
 
-A plugin for ElizaOS that provides access to DexPaprika's DeFi analytics platform, allowing AI agents to query real-time data on liquidity pools, DEXes, tokens and market activity across multiple blockchain networks.
-
-![DexPaprika Plugin Banner](./images/banner.jpg)
+This plugin integrates DexPaprika's DeFi analytics API with ElizaOS, providing real-time information about blockchain networks, decentralized exchanges (DEXes), liquidity pools, and tokens. With this plugin, users can access comprehensive DeFi data to make informed decisions about cryptocurrency trading and investing.
 
 ## Features
 
-- Query information across multiple blockchain networks (Ethereum, Solana, etc.)
-- Get real-time data on liquidity pools, including volume, price, and token details
-- Filter pools by network, DEX, or specific criteria
-- Retrieve token-specific data and market metrics
-- Search for tokens, pools, and DEXes
-- Formatted responses for easy consumption by LLMs
+The DexPaprika plugin offers the following capabilities:
 
-## No API Key Required ✨
-
-Unlike many blockchain data services, **DexPaprika doesn't require an API key** to access its data. This makes the plugin particularly easy to set up and use immediately without any registration or authentication steps.
+- **GET_NETWORKS** - Retrieve a list of all supported blockchain networks and their metadata
+- **GET_NETWORK_DEXES** - Get a list of available decentralized exchanges on a specific network
+- **GET_TOP_POOLS** - Get a paginated list of top liquidity pools from all networks
+- **GET_NETWORK_POOLS** - Get a list of top liquidity pools on a specific network
+- **GET_DEX_POOLS** - Get top pools on a specific DEX within a network
+- **GET_POOL_DETAILS** - Get detailed information about a specific pool on a network
+- **GET_TOKEN_DETAILS** - Get detailed information about a specific token on a network
+- **SEARCH** - Search for tokens, pools, and DEXes by name or identifier
 
 ## Installation
 
-1. Add the plugin to your project:
+To use this plugin with ElizaOS:
 
+1. Clone the repository:
 ```bash
-npm install @elizaos/plugin-dexpaprika
+git clone https://github.com/yourusername/elizaos-plugin-dexpaprika.git
 ```
 
-2. Add the plugin to your ElizaOS character configuration:
-
-```json
-{
-  "name": "DefiAssistant",
-  "plugins": ["@elizaos/plugin-dexpaprika"],
-  "settings": {
-    "secrets": {
-      "DEXPAPRIKA_API_KEY": "your-api-key-if-needed"
-    }
-  }
-}
+2. Install dependencies:
+```bash
+cd elizaos-plugin-dexpaprika
+npm install
 ```
 
-## Configuration
-
-| Parameter | Description | Required | Default |
-|-----------|-------------|----------|---------|
-| DEXPAPRIKA_API_KEY | API key for DexPaprika service | No | - |
-| DEXPAPRIKA_API_URL | Base URL for DexPaprika API | No | https://api.dexpaprika.com |
-
-## Usage
-
-### Example Prompts
-
-The plugin responds to natural language queries about DeFi pools and tokens:
-
-- "What are the top liquidity pools on Solana?"
-- "Show me the most active DEXes on Ethereum"
-- "What's the trading volume for USDC/ETH pairs?"
-- "Get detailed information about the SOL/USDC pool"
-
-### Available Actions
-
-#### getNetworks
-
-Retrieves a list of all supported blockchain networks.
-
-```javascript
-const result = await agent.execute('dexpaprika_getNetworks', {});
-```
-
-#### getNetworkDexes
-
-Gets a list of available DEXes on a specific network.
-
-```javascript
-const result = await agent.execute('dexpaprika_getNetworkDexes', {
-  network: 'solana',
-  limit: 5
-});
-```
-
-#### getTopPools
-
-Gets a paginated list of top liquidity pools from all networks.
-
-```javascript
-const result = await agent.execute('dexpaprika_getTopPools', {
-  limit: 10,
-  orderBy: 'volume_usd',
-  sort: 'desc'
-});
-```
-
-#### getNetworkPools
-
-Gets top pools on a specific network.
-
-```javascript
-const result = await agent.execute('dexpaprika_getNetworkPools', {
-  network: 'ethereum',
-  limit: 5
-});
-```
-
-#### getDexPools
-
-Gets top pools on a specific DEX within a network.
-
-```javascript
-const result = await agent.execute('dexpaprika_getDexPools', {
-  network: 'ethereum',
-  dex: 'uniswap',
-  limit: 5
-});
-```
-
-#### getPoolDetails
-
-Gets detailed information about a specific pool on a network.
-
-```javascript
-const result = await agent.execute('dexpaprika_getPoolDetails', {
-  network: 'ethereum',
-  poolAddress: '0x123abc...',
-  inversed: false
-});
-```
-
-#### getTokenDetails
-
-Gets detailed information about a specific token on a network.
-
-```javascript
-const result = await agent.execute('dexpaprika_getTokenDetails', {
-  network: 'ethereum',
-  tokenAddress: '0x123abc...'
-});
-```
-
-#### search
-
-Searches for tokens, pools, and DEXes by name or identifier.
-
-```javascript
-const result = await agent.execute('dexpaprika_search', {
-  query: 'uniswap'
-});
-```
-
-#### getStats
-
-Gets high-level statistics about the DexPaprika ecosystem.
-
-```javascript
-const result = await agent.execute('dexpaprika_getStats', {});
-```
-
-## Response Format
-
-Responses are formatted in a structured, LLM-friendly format with both raw data and formatted display elements:
-
-```json
-{
-  "formatted_response": {
-    "title": "Top 5 Pools on Solana",
-    "timestamp": "2025-03-12 12:34:56",
-    "pools": [
-      {
-        "position": 1,
-        "id": "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtL4Grryfu44Ze",
-        "dex": "Orca",
-        "tokens": "Wrapped SOL (SOL) - USD Coin (USDC)",
-        "volume": "$270,705,394.04",
-        "price": "$125.6453"
-      }
-    ],
-    "total_pools": 121,
-    "top_pool_summary": {
-      "name": "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtL4Grryfu44Ze",
-      "dex": "Orca",
-      "tokens": "Wrapped SOL (SOL) - USD Coin (USDC)",
-      "volume": "$270,705,394.04",
-      "price": "$125.6453"
-    }
-  },
-  "raw_data": {
-    "pools": [],
-    "page_info": {}
-  }
-}
-```
-
-## LLM Compatibility
-
-This plugin has been tested with the following LLMs:
-
-- ✅ OpenAI (GPT-3.5, GPT-4)
-- ⚠️ Llama (requires implementation of Llama-specific function calling in ElizaOS)
-- ⚠️ Anthropic Claude (requires implementation of Claude-specific function calling in ElizaOS)
-
-The plugin's core functionality is model-agnostic, but the integration with function calling depends on the ElizaOS framework's support for different models.
-
-## Development
-
-### Building the plugin
-
+3. Build the plugin:
 ```bash
 npm run build
 ```
 
-### Running tests
+4. Link the plugin to your ElizaOS instance.
 
-```bash
-npm test
+## Configuration
+
+The plugin accepts the following configuration parameters:
+
+- **DEXPAPRIKA_API_URL** - The base URL for the DexPaprika API (default: `https://api.dexpaprika.com`)
+- **DEXPAPRIKA_API_KEY** - (Optional) Your DexPaprika API key for increased rate limits
+
+You can configure these in your ElizaOS settings.
+
+## Usage Examples
+
+Here are some examples of how to use the plugin:
+
+### Get Supported Networks
+
+```
+What blockchain networks are supported by DexPaprika?
 ```
 
-## Links
+### Search for a Token
 
-- [DexPaprika API Documentation](https://docs.dexpaprika.com)
-- [ElizaOS Documentation](https://elizaos.com/docs)
-- [GitHub Repository](https://github.com/donbagger/plugin-dexpaprika)
+```
+Search for Bitcoin on DexPaprika
+```
+
+### View Pool Details
+
+```
+Get details for the ETH-USDC pool on Uniswap
+```
+
+## Development
+
+To develop this plugin:
+
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Make changes to the source code
+4. Build the plugin with `npm run build`
+5. Run tests with `npm test`
 
 ## License
 
-MIT 
+[MIT License](LICENSE)
+
+## Credits
+
+This plugin was developed for ElizaOS and utilizes the DexPaprika API for DeFi data.
+
+- [ElizaOS](https://elizaos.github.io/)
+- [DexPaprika](https://dexpaprika.com/) 

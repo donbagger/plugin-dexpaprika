@@ -7,8 +7,7 @@ import {
   PoolsResponse,
   PoolDetailsResponse,
   TokenDetailsResponse,
-  SearchResultsResponse,
-  StatsResponse
+  SearchResultsResponse
 } from '../src/types';
 
 // Mock axios
@@ -86,7 +85,6 @@ describe('DexPaprika Plugin', () => {
     expect(actionNames).toContain('getPoolDetails');
     expect(actionNames).toContain('getTokenDetails');
     expect(actionNames).toContain('search');
-    expect(actionNames).toContain('getStats');
   });
 
   describe('Actions', () => {
@@ -212,17 +210,6 @@ describe('DexPaprika Plugin', () => {
       dexes: [
         { dex_name: 'Uniswap V3', chain: 'ethereum', protocol: 'uniswapv3' }
       ]
-    };
-
-    const mockStatsResponse = {
-      networks_count: 10,
-      dexes_count: 100,
-      pools_count: 5000,
-      tokens_count: 10000,
-      total_volume_usd: 5000000000,
-      updated_at: '2023-01-01T00:00:00Z',
-      top_network_by_volume: 'ethereum',
-      top_dex_by_volume: 'Uniswap V3'
     };
 
     describe('getNetworks', () => {
@@ -494,34 +481,6 @@ describe('DexPaprika Plugin', () => {
         expect(result.formatted_response.tokens.count).toBe(0);
         expect(result.formatted_response.pools.count).toBe(0);
         expect(result.formatted_response.dexes.count).toBe(0);
-      });
-    });
-
-    describe('getStats', () => {
-      it('should get stats successfully', async () => {
-        const action = getAction('getStats');
-        expect(action).toBeDefined();
-
-        // Mock axios response
-        const axiosCreate = vi.mocked(axios.default.create);
-        const mockAxiosGet = vi.fn().mockResolvedValueOnce({ data: mockStatsResponse });
-        axiosCreate.mockReturnValue({ 
-          get: mockAxiosGet,
-          interceptors: { request: { use: vi.fn() } } 
-        } as any);
-
-        // Execute the action
-        const result = await action?.execute({ random_string: 'test' }, mockRuntime);
-        
-        // Verify API call
-        expect(mockAxiosGet).toHaveBeenCalledWith('/stats');
-        
-        // Verify result
-        expect(result).toHaveProperty('formatted_response');
-        expect(result).toHaveProperty('raw_data');
-        expect(result.formatted_response.title).toBe('DexPaprika Platform Statistics');
-        expect(result.formatted_response.total_networks).toBe(10);
-        expect(result.formatted_response.total_dexes).toBe(100);
       });
     });
   });

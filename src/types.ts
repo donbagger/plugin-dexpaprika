@@ -6,6 +6,30 @@
  * help AI agents understand how to properly use the plugin's capabilities.
  */
 
+import { type Action as ElizaAction, type Plugin as ElizaPlugin } from "@elizaos/core";
+
+// Define a type for the old-style actions
+export interface OldAction {
+  name: string;
+  description: string;
+  parameters: {
+    type: string;
+    properties: Record<string, any>;
+    required?: string[];
+  };
+  execute: (params: any, runtime: any) => Promise<any>;
+}
+
+// Define a hybrid interface for both old and new action types
+export interface CustomPlugin extends Omit<ElizaPlugin, 'actions'> {
+  name: string;
+  description: string;
+  actions: OldAction[];
+  evaluators: any[];
+  providers: any[];
+  initialize: (runtime: any) => Promise<boolean> | void;
+}
+
 // -----------------------------------------------------------------------------
 // BASE NETWORK TYPES
 // -----------------------------------------------------------------------------
@@ -559,46 +583,6 @@ export interface SearchResultsResponse {
 }
 
 // -----------------------------------------------------------------------------
-// STATS TYPES
-// -----------------------------------------------------------------------------
-
-/**
- * Response from the getStats action containing platform-wide statistics.
- * 
- * @example
- * {
- *   "chains": 21,
- *   "factories": 141,
- *   "pools": 5091826,
- *   "tokens": 4708300
- * }
- */
-export interface StatsResponse {
-  /** Number of blockchain networks tracked */
-  chains: number;
-  /** Number of factory contracts tracked */
-  factories: number;
-  /** Total number of liquidity pools tracked */
-  pools: number;
-  /** Total number of tokens tracked */
-  tokens: number;
-  /** Alias for pools for backward compatibility */
-  pools_count?: number;
-  /** Alias for tokens for backward compatibility */
-  tokens_count?: number;
-  /** Number of networks monitored */
-  networks_count?: number;
-  /** Number of DEXes monitored */
-  dexes_count?: number;
-  /** Total trading volume in USD */
-  total_volume_usd?: number;
-  /** Network with highest trading volume */
-  top_network_by_volume?: string;
-  /** DEX with highest trading volume */
-  top_dex_by_volume?: string;
-}
-
-// -----------------------------------------------------------------------------
 // FORMATTED OUTPUT TYPES
 // -----------------------------------------------------------------------------
 
@@ -831,47 +815,4 @@ export interface GetTokenDetailsParams {
 export interface SearchParams {
   /** Search term (e.g., "uniswap", "bitcoin", or a token address) */
   query: string;
-}
-
-/**
- * Parameters for the getStats action.
- * 
- * Used to retrieve high-level statistics about the DexPaprika ecosystem.
- * 
- * @example
- * { "random_string": "any_value" }
- */
-export interface GetStatsParams {
-  /** Dummy parameter (not used) */
-  random_string?: string;
-}
-
-/**
- * ElizaOS action interface for the DexPaprika plugin.
- */
-export interface Action {
-  /** Name of the action */
-  name: string;
-  /** Description of what the action does */
-  description: string;
-  /** Parameters accepted by the action */
-  parameters: any;
-  /** Function that executes the action */
-  execute: (params: any, runtime: any) => Promise<any>;
-}
-
-/**
- * ElizaOS plugin interface.
- */
-export interface Plugin {
-  /** Name of the plugin */
-  name: string;
-  /** Description of the plugin */
-  description: string;
-  /** Plugin version */
-  version?: string;
-  /** Actions provided by the plugin */
-  actions?: Action[];
-  /** Function to initialize the plugin */
-  initialize?: (runtime: any) => Promise<void>;
 } 

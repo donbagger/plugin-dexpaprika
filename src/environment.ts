@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { elizaLogger, type IAgentRuntime } from "@elizaos/core";
 
 // Define schema for plugin configuration
 export const ConfigSchema = z.object({
@@ -10,7 +11,7 @@ export const ConfigSchema = z.object({
 export type DexPaprikaConfig = z.infer<typeof ConfigSchema>;
 
 // Function to get settings from runtime
-export function getConfig(runtime: any): DexPaprikaConfig {
+export function getConfig(runtime: IAgentRuntime): DexPaprikaConfig {
   try {
     const config = {
       DEXPAPRIKA_API_KEY: runtime.getSetting('DEXPAPRIKA_API_KEY'),
@@ -25,4 +26,26 @@ export function getConfig(runtime: any): DexPaprikaConfig {
     }
     throw error;
   }
+}
+
+// Function to validate DexPaprika configuration
+export async function validateDexPaprikaConfig(runtime: IAgentRuntime): Promise<DexPaprikaConfig> {
+  elizaLogger.log("Validating DexPaprika configuration...");
+  const config = getConfig(runtime);
+  
+  if (!config.DEXPAPRIKA_API_URL) {
+    elizaLogger.warn("DexPaprika API URL not provided, using default: https://api.dexpaprika.com");
+  }
+  
+  elizaLogger.success("DexPaprika configuration validated successfully");
+  return config;
+}
+
+// Function to get API configuration
+export function getApiConfig(config: DexPaprikaConfig) {
+  return {
+    baseUrl: config.DEXPAPRIKA_API_URL,
+    apiKey: config.DEXPAPRIKA_API_KEY || '',
+    headerKey: 'Authorization'
+  };
 } 
