@@ -33,14 +33,9 @@
   "agentConfig": {
     "pluginType": "elizaos:plugin:1.0.0",
     "pluginParameters": {
-      "DEXPAPRIKA_API_KEY": {
-        "type": "string",
-        "description": "API key for DexPaprika service (if needed)",
-        "required": false
-      },
       "DEXPAPRIKA_API_URL": {
         "type": "string",
-        "description": "Base URL for DexPaprika API",
+        "description": "Base URL for the DexPaprika API",
         "default": "https://api.dexpaprika.com"
       }
     }
