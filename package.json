@@ -20,7 +20,7 @@
     "blockchain",
     "dexpaprika"
   ],
-  "author": "Your Name",
+  "author": "DexPaprika Team",
   "license": "MIT",
   "dependencies": {
     "@elizaos/core": "^0.25.9",

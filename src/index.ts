@@ -10,6 +10,18 @@ import { CustomPlugin } from "./types.js";
  * 
  * @author DexPaprika Team
  * @version 0.1.0
+ * 
+ * IMPORTANT: This plugin only supports the following functions:
+ * - GET_NETWORKS (getNetworks)
+ * - GET_NETWORK_DEXES (getNetworkDexes)
+ * - GET_TOP_POOLS (getTopPools)
+ * - GET_NETWORK_POOLS (getNetworkPools)
+ * - GET_DEX_POOLS (getDexPools)
+ * - GET_POOL_DETAILS (getPoolDetails)
+ * - GET_TOKEN_DETAILS (getTokenDetails)
+ * - SEARCH (search)
+ * 
+ * No other functions (such as getTokenPrice) are implemented.
  */
 export const dexpaprikaPlugin: CustomPlugin = {
     name: "dexpaprika",

@@ -4,7 +4,7 @@ This plugin integrates DexPaprika's DeFi analytics API with ElizaOS, providing r
 
 ## Features
 
-The DexPaprika plugin offers the following capabilities:
+The DexPaprika plugin offers the following capabilities (these are the ONLY available functions):
 
 - **GET_NETWORKS** - Retrieve a list of all supported blockchain networks and their metadata
 - **GET_NETWORK_DEXES** - Get a list of available decentralized exchanges on a specific network
@@ -15,18 +15,24 @@ The DexPaprika plugin offers the following capabilities:
 - **GET_TOKEN_DETAILS** - Get detailed information about a specific token on a network
 - **SEARCH** - Search for tokens, pools, and DEXes by name or identifier
 
+## ⚠️ Important: Available Functions
+
+**WARNING**: Only the functions listed above are implemented and available in this plugin. Do not attempt to call any other functions (such as `getTokenPrice`, etc.) as they do not exist and will result in errors.
+
+When using this plugin with AI systems like Eliza, ensure that only these specific functions are being called with their exact names.
+
 ## Installation
 
 To use this plugin with ElizaOS:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/elizaos-plugin-dexpaprika.git
+git clone https://github.com/donbagger/plugin-dexpaprika.git
 ```
 
 2. Install dependencies:
 ```bash
-cd elizaos-plugin-dexpaprika
+cd plugin-dexpaprika
 npm install
 ```
 
@@ -86,5 +92,7 @@ To develop this plugin:
 
 This plugin was developed for ElizaOS and utilizes the DexPaprika API for DeFi data.
 
-- [ElizaOS](https://elizaos.github.io/)
-- [DexPaprika](https://dexpaprika.com/) 
+- [ElizaOS](https://github.com/elizaOS/eliza)
+- [DexPaprika](https://dexpaprika.com/)
+- [DexPaprika Documenation](https://docs.dexpaprika.com)
+- [GitHub Repository](https://github.com/donbagger/plugin-dexpaprika) 
