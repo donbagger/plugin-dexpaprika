@@ -65,7 +65,7 @@ What blockchain networks are supported by DexPaprika?
 ### Search for a Token
 
 ```
-Search for Bitcoin on DexPaprika
+Search for PENGU on DexPaprika
 ```
 
 ### View Pool Details
