@@ -2,7 +2,7 @@
 
 A plugin for ElizaOS that provides access to DexPaprika's DeFi analytics platform, allowing AI agents to query real-time data on liquidity pools, DEXes, tokens and market activity across multiple blockchain networks.
 
-![DexPaprika Plugin Banner](./images/banner.png)
+![DexPaprika Plugin Banner](./images/banner.jpg)
 
 ## Features
 
@@ -12,6 +12,10 @@ A plugin for ElizaOS that provides access to DexPaprika's DeFi analytics platfor
 - Retrieve token-specific data and market metrics
 - Search for tokens, pools, and DEXes
 - Formatted responses for easy consumption by LLMs
+
+## No API Key Required ✨
+
+Unlike many blockchain data services, **DexPaprika doesn't require an API key** to access its data. This makes the plugin particularly easy to set up and use immediately without any registration or authentication steps.
 
 ## Installation
 
@@ -211,9 +215,9 @@ npm test
 
 ## Links
 
-- [DexPaprika API Documentation](https://api.dexpaprika.com/docs)
+- [DexPaprika API Documentation](https://docs.dexpaprika.com)
 - [ElizaOS Documentation](https://elizaos.com/docs)
-- [GitHub Repository](https://github.com/yourusername/plugin-dexpaprika)
+- [GitHub Repository](https://github.com/donbagger/plugin-dexpaprika)
 
 ## License
 
