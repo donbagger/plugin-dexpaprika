@@ -64,7 +64,28 @@ const formatPoolData = (pools: any[], startIndex = 0): FormattedPoolData[] => {
   });
 };
 
-// Action implementations
+/**
+ * Returns a list of all blockchain networks supported by DexPaprika.
+ * 
+ * Use this action to:
+ * - Get a complete list of blockchains available for data queries
+ * - Find network IDs needed for other actions
+ * - Check which networks are supported by the API
+ * 
+ * @example
+ * // Get all supported blockchain networks
+ * const networks = await agent.execute('dexpaprika_getNetworks', {});
+ * // Example output:
+ * // [
+ * //   { "id": "ethereum", "display_name": "Ethereum" },
+ * //   { "id": "solana", "display_name": "Solana" },
+ * //   ...
+ * // ]
+ * 
+ * @param params - Empty object (no parameters required)
+ * @param runtime - ElizaOS runtime environment
+ * @returns List of supported blockchain networks
+ */
 export const getNetworks = async (params: GetNetworksParams, runtime: any) => {
   try {
     const config = getConfig(runtime);
@@ -81,6 +102,31 @@ export const getNetworks = async (params: GetNetworksParams, runtime: any) => {
   }
 };
 
+/**
+ * Returns a list of available decentralized exchanges (DEXes) on a specific blockchain network.
+ * 
+ * Use this action to:
+ * - Find which DEXes operate on a particular blockchain
+ * - Get DEX identifiers for use with the getDexPools action
+ * - Compare DEX availability across different networks
+ * 
+ * @example
+ * // Get all DEXes on Solana
+ * const dexes = await agent.execute('dexpaprika_getNetworkDexes', {
+ *   network: "solana"
+ * });
+ * // Example output:
+ * // {
+ * //   "dexes": [
+ * //     { "dex_id": "raydium", "dex_name": "Raydium", "chain": "solana", "protocol": "raydium" },
+ * //     { "dex_id": "orca", "dex_name": "Orca", "chain": "solana", "protocol": "orca" }
+ * //   ]
+ * // }
+ * 
+ * @param params - Parameters specifying the network and pagination options
+ * @param runtime - ElizaOS runtime environment
+ * @returns List of DEXes on the specified network
+ */
 export const getNetworkDexes = async (params: GetNetworkDexesParams, runtime: any) => {
   try {
     const { network, page = 0, limit = 10 } = params;
@@ -100,6 +146,26 @@ export const getNetworkDexes = async (params: GetNetworkDexesParams, runtime: an
   }
 };
 
+/**
+ * Returns a paginated list of top liquidity pools from all networks.
+ * 
+ * Use this action to:
+ * - Find the most active pools across all blockchains
+ * - Track global trading volume and activity
+ * - Compare performance between different tokens and pools
+ * 
+ * @example
+ * // Get top 5 pools across all networks by volume
+ * const topPools = await agent.execute('dexpaprika_getTopPools', {
+ *   limit: 5,
+ *   orderBy: "volume_usd",
+ *   sort: "desc"
+ * });
+ * 
+ * @param params - Parameters for pagination and sorting
+ * @param runtime - ElizaOS runtime environment
+ * @returns List of top pools across all networks
+ */
 export const getTopPools = async (params: GetTopPoolsParams, runtime: any) => {
   try {
     const { page = 0, limit = 10, orderBy = 'volume_usd', sort = 'desc' } = params;
@@ -289,7 +355,7 @@ export const getPoolDetails = async (params: GetPoolDetailsParams, runtime: any)
           price: priceFormatted,
           volume_24h: volumeFormatted,
           created_at: pool.created_at,
-          fee: `${pool.fee * 100}%`,
+          fee: pool.fee !== null ? `${pool.fee * 100}%` : 'N/A',
           price_change_24h: pool.last_price_change_usd_24h ? 
             `${pool.last_price_change_usd_24h > 0 ? '+' : ''}${(pool.last_price_change_usd_24h * 100).toFixed(2)}%` : 
             'N/A',
@@ -364,76 +430,149 @@ export const getTokenDetails = async (params: GetTokenDetailsParams, runtime: an
 export const search = async (params: SearchParams, runtime: any) => {
   try {
     const { query } = params;
+    
+    // Validate query parameter
+    if (!query || query.trim() === '') {
+      throw new Error('Search query cannot be empty');
+    }
+    
+    // Check if the query is too short (DexPaprika API requires at least 3 characters)
+    if (query.trim().length < 3) {
+      throw new Error('Search query must be at least 3 characters long');
+    }
+    
     const config = getConfig(runtime);
     const client = createApiClient(config.DEXPAPRIKA_API_URL, config.DEXPAPRIKA_API_KEY);
     
-    const response = await client.get<SearchResultsResponse>('/search', {
-      params: { query }
-    });
-
-    // Format the response for better readability
-    if (response.data) {
-      const { tokens, pools, dexes } = response.data;
-      const timestamp = new Date().toISOString().replace('T', ' at ').substring(0, 19);
-      
-      // Format top results from each category
-      const topTokens = tokens?.slice(0, 3).map(token => ({
-        id: token.id,
-        name: token.name,
-        symbol: token.symbol,
-        network: token.chain,
-        price: token.price_usd ? `$${token.price_usd.toLocaleString('en-US', { 
-          minimumFractionDigits: 6, 
-          maximumFractionDigits: 6 
-        })}` : 'N/A'
-      })) || [];
-      
-      const topPools = pools?.slice(0, 3).map((pool, index) => ({
-        position: index + 1,
-        id: pool.id,
-        dex: pool.dex_name,
-        tokens: pool.tokens.map(t => `${t.name} (${t.symbol})`).join(' - '),
-        volume: pool.volume_usd ? `$${pool.volume_usd.toLocaleString('en-US', { 
-          minimumFractionDigits: 2, 
-          maximumFractionDigits: 2 
-        })}` : 'N/A',
-        network: pool.chain
-      })) || [];
-      
-      const topDexes = dexes?.slice(0, 3).map(dex => ({
-        name: dex.dex_name,
-        network: dex.chain,
-        protocol: dex.protocol
-      })) || [];
-      
-      return {
-        formatted_response: {
-          title: `Search Results for "${query}"`,
-          timestamp: timestamp,
-          tokens: {
-            count: tokens?.length || 0,
-            top_results: topTokens
-          },
-          pools: {
-            count: pools?.length || 0,
-            top_results: topPools
-          },
-          dexes: {
-            count: dexes?.length || 0,
-            top_results: topDexes
-          }
-        },
-        raw_data: response.data
-      };
+    // Debug log the request details
+    console.log('Making search request:');
+    console.log(`- Base URL: ${config.DEXPAPRIKA_API_URL}`);
+    console.log(`- Endpoint: /search`);
+    console.log(`- Query: ${query}`);
+    console.log(`- Full URL: ${config.DEXPAPRIKA_API_URL}/search?query=${encodeURIComponent(query)}`);
+    
+    // Try making a direct axios call outside the client to compare
+    console.log('\nTrying direct axios call:');
+    try {
+      const directResult = await axios.get(`${config.DEXPAPRIKA_API_URL}/search?query=${encodeURIComponent(query)}`);
+      console.log(`- Direct call success: ${directResult.status}`);
+    } catch (directError: unknown) {
+      console.error(`- Direct call failed:`, directError instanceof Error ? directError.message : 'Unknown error');
+      if (axios.isAxiosError(directError)) {
+        console.error(`  - Status: ${directError.response?.status}`);
+        console.error(`  - Data: ${JSON.stringify(directError.response?.data)}`);
+      }
     }
     
-    return response.data;
+    try {
+      console.log('\nTrying client call:');
+      const response = await client.get<SearchResultsResponse>('/search', {
+        params: { query }
+      });
+
+      // Debug log the response status and data
+      console.log(`- Client call success: ${response.status}`);
+      console.log(`- Headers: ${JSON.stringify(response.headers)}`);
+      console.log(`- Data sample: ${JSON.stringify(response.data).substring(0, 100)}...`);
+
+      // Format the response for better readability
+      if (response.data) {
+        const { tokens, pools, dexes } = response.data;
+        const timestamp = new Date().toISOString().replace('T', ' at ').substring(0, 19);
+        
+        // Format top results from each category
+        const topTokens = tokens?.slice(0, 3).map(token => ({
+          id: token.id,
+          name: token.name,
+          symbol: token.symbol,
+          network: token.chain,
+          price: token.price_usd ? `$${token.price_usd.toLocaleString('en-US', { 
+            minimumFractionDigits: 6, 
+            maximumFractionDigits: 6 
+          })}` : 'N/A'
+        })) || [];
+        
+        const topPools = pools?.slice(0, 3).map((pool, index) => ({
+          position: index + 1,
+          id: pool.id,
+          dex: pool.dex_name,
+          tokens: pool.tokens.map(t => `${t.name} (${t.symbol})`).join(' - '),
+          volume: pool.volume_usd ? `$${pool.volume_usd.toLocaleString('en-US', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+          })}` : 'N/A',
+          network: pool.chain
+        })) || [];
+        
+        const topDexes = dexes?.slice(0, 3).map(dex => ({
+          name: dex.dex_name,
+          network: dex.chain,
+          protocol: dex.protocol
+        })) || [];
+        
+        return {
+          formatted_response: {
+            title: `Search Results for "${query}"`,
+            timestamp: timestamp,
+            tokens: {
+              count: tokens?.length || 0,
+              top_results: topTokens
+            },
+            pools: {
+              count: pools?.length || 0,
+              top_results: topPools
+            },
+            dexes: {
+              count: dexes?.length || 0,
+              top_results: topDexes
+            }
+          },
+          raw_data: response.data
+        };
+      }
+      
+      return response.data;
+    } catch (innerError) {
+      // Debug log any error details
+      console.error(`\nClient call failed:`);
+      if (axios.isAxiosError(innerError)) {
+        console.error(`- Status: ${innerError.response?.status}`);
+        console.error(`- Status text: ${innerError.response?.statusText}`);
+        console.error(`- Response data: ${JSON.stringify(innerError.response?.data)}`);
+        console.error(`- Request URL: ${innerError.config?.url}`);
+        console.error(`- Request method: ${innerError.config?.method}`);
+        console.error(`- Request params: ${JSON.stringify(innerError.config?.params)}`);
+        console.error(`- Request headers: ${JSON.stringify(innerError.config?.headers)}`);
+        
+        // Try again with direct URL to see if query parameter is the issue
+        try {
+          console.log('\nTrying fallback direct URL call:');
+          const fallbackResult = await axios.get(`${config.DEXPAPRIKA_API_URL}/search?query=${encodeURIComponent(query)}`);
+          console.log(`- Fallback call success: ${fallbackResult.status}`);
+          
+          // If this worked, return the fallback result
+          console.log('Using fallback result');
+          return fallbackResult.data;
+        } catch (fallbackError: unknown) {
+          console.error(`- Fallback call also failed:`, fallbackError instanceof Error ? fallbackError.message : 'Unknown error');
+        }
+      } else {
+        console.error(`- Non-Axios error: ${(innerError as Error).message}`);
+        console.error(`- Stack: ${(innerError as Error).stack}`);
+      }
+      throw innerError; // Re-throw to be caught by outer catch block
+    }
   } catch (error) {
     console.error('Error searching DexPaprika:', error);
     if (axios.isAxiosError(error)) {
-      throw new Error(`DexPaprika API error: ${error.response?.status} - ${error.response?.data?.error || error.message}`);
+      // Handle common API errors specifically for search
+      if (error.response?.status === 400) {
+        const errorMessage = error.response?.data?.error || 'The search query is invalid or too short (min 3 characters required)';
+        throw new Error(`DexPaprika search error: ${errorMessage} - To search DexPaprika, try using a more specific query with at least 3 characters. For tokens, try including the full name or symbol.`);
+      }
+      throw new Error(`DexPaprika API error: ${error.response?.status} - ${error.response?.data?.error || error.message}. Please try a different search term or check your network connection.`);
     }
-    throw new Error(`Unexpected error: ${(error as Error).message}`);
+    throw new Error(`Unexpected error: ${(error as Error).message}. Please try again with a different search term.`);
   }
 };
 
